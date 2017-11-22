@@ -5,92 +5,80 @@
 #
 class varnish::params {
 
-  $package_name = 'varnish'
-  $service_name = 'varnish'
-
   case $::osfamily {
-    'RedHat', 'Amazon': {
+    'RedHat': {
+
+      $sysconfig  = '/etc/sysconfig/varnish'
 
       case $::operatingsystemmajrelease {
+
         '6': {
-          $addrepo            = true
-          $repoclass          = "varnish::repo::el${::operatingsystemmajrelease}"
-          $sysconfig          = '/etc/sysconfig/varnish'
-          $varnish_version    = '3.0'
-          $vcl_reload         = '/usr/bin/varnish_reload_vcl'
+          $os_service_provider = 'sysvinit'
+          $vcl_reload          = $::varnish::version_major ? {
+            '5' => '/usr/sbin/varnish_reload_vcl',
+            '4' => '/usr/sbin/varnish_reload_vcl',
+            '3' => '/usr/bin/varnish_reload_vcl',
+          }
         }
+
         '7': {
-          $addrepo            = true
-          $repoclass          = "varnish::repo::el${::operatingsystemmajrelease}"
-          $sysconfig          = '/etc/varnish/varnish.params'
-          $varnish_version    = '4.0'
-          $vcl_reload         = '/usr/sbin/varnish_reload_vcl'
+          $os_service_provider = 'systemd'
+          $vcl_reload          = $::varnish::version_major ? {
+            '5' => '/sbin/varnish_reload_vcl',
+            '4' => '/usr/sbin/varnish_reload_vcl',
+            '3' => '/usr/bin/varnish_reload_vcl',
+          }
         }
+
         default: {
-          # Amazon Linux
-          $addrepo            = true
-          $repoclass          = "varnish::repo::el${::operatingsystemmajrelease}"
-          $sysconfig          = '/etc/sysconfig/varnish'
-          $varnish_version    = '3.0'
-          $vcl_reload         = '/usr/bin/varnish_reload_vcl'
+          $os_service_provider = 'systemd'
+          $vcl_reload          = '/usr/sbin/varnish_reload_vcl'
         }
       }
     }
+
     'Debian': {
-      case $::lsbdistcodename {
-        'precise': {
-          $addrepo            = false
-          $sysconfig          = '/etc/default/varnish'
-          $varnish_version    = '3.0'
-          $vcl_reload         = '/usr/share/varnish/reload-vcl'
+      $vcl_reload = '/usr/share/varnish/reload-vcl'
+      $sysconfig  = '/etc/default/varnish'
 
+      case $::operatingsystem {
+        'Ubuntu': {
+          $systemd_version = '16.04'
         }
-        'trusty': {
-          $addrepo            = true
-          $repoclass          = 'varnish::repo::debian'
-          $sysconfig          = '/etc/default/varnish'
-          $varnish_version    = '4.0'
-          $vcl_reload         = '/usr/share/varnish/reload-vcl'
-
-        }
-        'wheezy': {
-          $addrepo            = true
-          $repoclass          = 'varnish::repo::debian'
-          $sysconfig          = '/etc/default/varnish'
-          $varnish_version    = '3.0'
-          $vcl_reload         = '/usr/share/varnish/reload-vcl'
-
-        }
-        'jessie': {
-          $addrepo            = true
-          $repoclass          = 'varnish::repo::debian'
-          $sysconfig          = '/etc/default/varnish'
-          $varnish_version    = '4.0'
-          $vcl_reload         = '/usr/share/varnish/reload-vcl'
-
+        'Debian': {
+          $systemd_version = '8.0'
         }
         default: {
-          fail("${::operatingsystem} (${::lsbdistdescription}, ${::lsbdistcodename}) not supported")
+          fail("Unsupported Debian OS: ${::operatingsystem}")
         }
       }
+
+      if versioncmp($::lsbdistrelease,$systemd_version) >= 0 {
+        $os_service_provider = 'systemd'
+      } else {
+        $os_service_provider = 'sysvinit'
+      }
     }
+
     default: {
-      fail("${::operatingsystem} not supported")
+      fail("${::osfamily} not supported")
     }
   }
 
-  # Standard Varnish sysconfig settings
-  $vcl_conf       = '/etc/varnish/default.vcl'
-  $listen         = '0.0.0.0'
-  $listen_port    = 6081
-  $admin_listen   = '127.0.0.1'
-  $admin_port     = 6082
-  $secret_file    = '/etc/varnish/secret'
-  $min_threads    = 50
-  $max_threads    = 1000
-  $thread_timeout = 120
-  $storage_type   = 'file'
-  $storage_file   = '/var/lib/varnish/varnish_storage.bin'
-  $storage_size   = '1G'
-  $package_ensure = 'present'
+  # == Service provider depends on Varnish version and OS
+
+  if $::varnish::version_major == '3' {
+    if $::operatingsystem == 'Debian' {
+      if versioncmp($::lsbdistrelease,'8.0') >= 0 {
+        $service_provider = 'systemd'
+      } else {
+        $service_provider = 'sysvinit'
+      }
+    } else {
+      $service_provider = 'sysvinit'
+    }
+  } else {
+    $service_provider = $os_service_provider
+  }
+
 }

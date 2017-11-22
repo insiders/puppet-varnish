@@ -1,0 +1,53 @@
+############################################
+# WARNING:
+# Managed by Puppet - DO NOT modify locally!
+############################################
+
+START=yes
+NFILES=131072
+MEMLOCK=82000
+
+RELOAD_VCL=1
+VARNISH_VCL_CONF=<%= scope['::varnish::vcl_conf'] %>
+<%
+  if scope['::varnish::version_major'] == 3
+    sep = ','
+  else
+    sep = ' -a '
+  end
+
+  if scope['::varnish::listen'].is_a?(Array)
+-%>
+VARNISH_LISTEN="-a <% scope['::varnish::listen'].each_with_index do |addr, idx| %><%= addr %><% unless addr.include?(':') %>:<%= scope['::varnish::listen_port'] %><% end -%><% if idx != (scope['::varnish::listen'].length-1) -%><%= sep %><% end -%><% end %>"
+<% else -%>
+VARNISH_LISTEN="-a <%= scope['::varnish::listen'] %>:<%= scope['::varnish::listen_port'] %>"
+<% end -%>
+VARNISH_ADMIN_LISTEN_ADDRESS=<%= scope['::varnish::admin_listen'] %>
+VARNISH_ADMIN_LISTEN_PORT=<%= scope['::varnish::admin_port'] %>
+VARNISH_SECRET_FILE=<%= scope['::varnish::secret_file'] %>
+VARNISH_MIN_THREADS=<%= scope['::varnish::min_threads'] %>
+VARNISH_MAX_THREADS=<%= scope['::varnish::max_threads'] %>
+VARNISH_THREAD_TIMEOUT=<%= scope['::varnish::thread_timeout'] %>
+VARNISH_STORAGE=<%= scope['::varnish::storage_type'] %>,<% if scope['::varnish::storage_type'] == 'file' -%><%= scope['::varnish::storage_file'] %>,<% end -%><%= scope['::varnish::storage_size'] %>
+VARNISH_TTL=120
+
+DAEMON_OPTS="<% if scope['::varnish::params::service_provider'] == 'sysvinit' -%><%= scope['::varnish::config::jail_opt'] %> \<% end %>
+             ${VARNISH_LISTEN} \
+<% unless [nil, :undefined, :undef, ''].include?(scope['::varnish::instance_name']) -%>
+             -n <%= scope['::varnish::instance_name'] %> \
+<% end -%>
+             -f ${VARNISH_VCL_CONF} \
+             -T ${VARNISH_ADMIN_LISTEN_ADDRESS}:${VARNISH_ADMIN_LISTEN_PORT} \
+             -t ${VARNISH_TTL} \
+<% if scope['::varnish::version_major'] == '3' -%>
+             -w ${VARNISH_MIN_THREADS},${VARNISH_MAX_THREADS},${VARNISH_THREAD_TIMEOUT} \
+<% else -%>
+             -p thread_pool_min=${VARNISH_MIN_THREADS} \
+             -p thread_pool_max=${VARNISH_MAX_THREADS} \
+             -p thread_pool_timeout=${VARNISH_THREAD_TIMEOUT} \
+<% end -%>
+<% scope['::varnish::runtime_params'].each do |k,v| -%>
+             -p <%= k %>=<%= v %> \
+<% end -%>
+             -S ${VARNISH_SECRET_FILE} \
+             -s ${VARNISH_STORAGE}"
