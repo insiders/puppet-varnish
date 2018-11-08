@@ -15,6 +15,7 @@ class varnish::params {
         '6': {
           $os_service_provider = 'sysvinit'
           $vcl_reload          = $::varnish::version_major ? {
+            '6' => '/usr/sbin/varnish_reload_vcl',
             '5' => '/usr/sbin/varnish_reload_vcl',
             '4' => '/usr/sbin/varnish_reload_vcl',
             '3' => '/usr/bin/varnish_reload_vcl',
@@ -24,6 +25,7 @@ class varnish::params {
         '7': {
           $os_service_provider = 'systemd'
           $vcl_reload          = $::varnish::version_major ? {
+            '6' => '/usr/sbin/varnish_reload_vcl',
             '5' => '/sbin/varnish_reload_vcl',
             '4' => '/usr/sbin/varnish_reload_vcl',
             '3' => '/usr/bin/varnish_reload_vcl',
@@ -43,8 +45,20 @@ class varnish::params {
 
       case $::operatingsystem {
         'Ubuntu': {
-          $systemd_version = '16.04'
-        }
+          case $::lsbdistcodename {
+            'trusty': {
+              $systemd_version = '14.04'
+            }
+            'xenial': {
+              $systemd_version = '16.04'
+            }
+            'bionic': {
+              $systemd_version = '18.04'
+            }
+            default: {
+              fail("Unsupported Ubuntu release: ${::lsbdistcodename}")
+            }
+          }        }
         'Debian': {
           $systemd_version = '8'
         }

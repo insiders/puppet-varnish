@@ -13,6 +13,7 @@ BOXES = [
   { name: "debian8",  box: "debian/jessie64", version: "8.9.0" },
   { name: "ubuntu14", box: "ubuntu/trusty64", version: "20170810.0.0" },
   { name: "ubuntu16", box: "ubuntu/xenial64", version: "20170811.0.0" },
+  { name: "ubuntu18", box: "ubuntu/bionic64", version: "20181029.0.0" },
   { name: "centos6",  box: "centos/6", version: "1707.01" },
   { name: "centos7",  box: "centos/7", version: "1707.01" }
 ]
