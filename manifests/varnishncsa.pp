@@ -16,4 +16,12 @@ class varnish::varnishncsa (
   notify { 'logformat':
     message => $logformat,
   }
+
+  file { '/etc/systemd/system/varnishncsa.service.d/':
+    ensure => 'directory',
+  }
+  file { '/etc/systemd/system/varnishncsa.service.d/varnishncsa.conf':
+    ensure  => 'present',
+    content => "[Service]\nExecStart=\nExecStart=/usr/bin/varnishncsa -a -w /var/log/varnish/varnishncsa.log -D -F${logformat}\n"
+  }
 }
