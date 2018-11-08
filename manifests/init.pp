@@ -39,6 +39,8 @@
 #   Ensure specific package version for Varnish, eg 3.0.5-1.el6
 # [*runtime_params*]
 #   Hash of key:value runtime parameters
+# @param enabled Whether to enable and start the varnishncsa daemon. Boolean. Default to false.
+# @param logformat The log format that varnishncsa should use. Optional String. If not specified the default format will be used, which resembles Apache "combined" log format.
 #
 class varnish (
   Hash $runtime_params                      = {},
@@ -64,6 +66,8 @@ class varnish (
   String $service_name                      = 'varnish',
   Optional[String] $vcl_reload_cmd          = undef,
   String $vcl_reload_path                   = $::path,
+  Boolean $varnishncsa_enable               = false,
+  Optional[String] $varnishncsa_logformat   = '%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-agent}i"',
 ) {
 
   if $package_ensure == 'present' {
@@ -108,6 +112,11 @@ class varnish (
 
   class { '::varnish::service':
     require => Class['::varnish::config'],
+  }
+
+  class { '::varnish::varnishncsa':
+    enabled   => $varnishncsa_enable,
+    logformat => $varnishncsa_logformat,
   }
 
 }
