@@ -9,8 +9,9 @@ class varnish::varnishncsa (
 ) {
 
   service { 'varnishncsa':
-    ensure => $enabled,
-    enable => $enabled,
+    ensure  => $enabled,
+    enable  => $enabled,
+    require => Class['varnish::service'],
   }
 
   if $::varnish::params::service_provider == 'systemd' {
