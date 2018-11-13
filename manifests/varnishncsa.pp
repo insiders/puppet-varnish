@@ -15,7 +15,7 @@ class varnish::varnishncsa (
 
   if $::varnish::params::service_provider == 'systemd' {
 
-    $_logformat = regsubst($logformat, '%', '%%')
+    $_logformat = regsubst($logformat, '%', '%%', 'G')
 
     file { '/etc/systemd/system/varnishncsa.service.d/':
       ensure => 'directory',
@@ -37,7 +37,7 @@ class varnish::varnishncsa (
 
   } elsif $::varnish::params::service_provider == 'sysvinit' {
 
-    $_logformat = regsubst($logformat, '"', '\"')
+    $_logformat = regsubst($logformat, '"', '\\\"', 'G')
 
     file { '/etc/default/varnishncsa':
       owner   => 'root',
