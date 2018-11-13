@@ -46,7 +46,7 @@ class varnish::varnishncsa (
     file {'/etc/init.d/varnishncsa':
       owner   => 'root',
       group   => 'root',
-      mode    => '0644',
+      mode    => '0755',
       content => template('varnish/varnishncsa.initd.sysvinit.erb'),
       notify  => Service['varnishncsa'],
     }
