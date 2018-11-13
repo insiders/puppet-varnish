@@ -33,5 +33,23 @@ class varnish::varnishncsa (
       notify      => Service['varnishncsa'],
     }
 
+  } elsif $::varnish::params::service_provider == 'sysvinit' {
+
+    file { '/etc/default/varnishncsa':
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => template('varnish/varnishncsa.default.sysvinit.erb'),
+      notify  => Service['varnishncsa'],
+    }
+
+    file {'/etc/init.d/varnishncsa':
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => template('varnish/varnishncsa.initd.sysvinit.erb'),
+      notify  => Service['varnishncsa'],
+    }
+
   }
 }

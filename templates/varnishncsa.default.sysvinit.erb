@@ -1,0 +1,10 @@
+############################################
+# WARNING:
+# Managed by Puppet - DO NOT modify locally!
+############################################
+
+VARNISHNCSA_ENABLED=1
+DAEMON_OPTS="-a -w ${LOGFILE} -D -P ${PIDFILE} \
+<% if scope['::varnish::varnishncsa::enable'] == true -%>
+             -F <%= scope['::varnish::varnishncsa::logformat'] %> \
+<% end -%>"
