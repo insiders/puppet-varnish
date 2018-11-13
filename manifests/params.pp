@@ -46,9 +46,6 @@ class varnish::params {
       case $::operatingsystem {
         'Ubuntu': {
           case $::lsbdistcodename {
-            'trusty': {
-              $systemd_version = '14.04'
-            }
             'xenial': {
               $systemd_version = '16.04'
             }
@@ -56,7 +53,7 @@ class varnish::params {
               $systemd_version = '18.04'
             }
             default: {
-              fail("Unsupported Ubuntu release: ${::lsbdistcodename}")
+              $systemd_version = '999'
             }
           }        }
         'Debian': {
