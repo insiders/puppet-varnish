@@ -4,7 +4,3 @@
 ############################################
 
 VARNISHNCSA_ENABLED=1
-DAEMON_OPTS="-a -w ${LOGFILE} -D -P ${PIDFILE} \
-<% if @enabled == true -%>
-             -F <%= @_logformat %> \
-<% end -%>"

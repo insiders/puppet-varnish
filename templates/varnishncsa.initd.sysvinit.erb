@@ -1,4 +1,8 @@
 #! /bin/sh
+############################################
+# WARNING:
+# Managed by Puppet - DO NOT modify locally!
+############################################
 
 ### BEGIN INIT INFO
 # Provides:          varnishncsa
@@ -43,6 +47,7 @@ start_varnishncsa() {
     create_pid_directory
     if start-stop-daemon --start --pidfile ${PIDFILE} \
         --chuid $USER --exec ${DAEMON} -- ${DAEMON_OPTS} \
+        -F <%=@_logformat -%> \
         > ${output} 2>&1; then
         log_end_msg 0
     else
