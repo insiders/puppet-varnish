@@ -5,6 +5,6 @@
 
 VARNISHNCSA_ENABLED=1
 DAEMON_OPTS="-a -w ${LOGFILE} -D -P ${PIDFILE} \
-<% if scope['::varnish::varnishncsa::enable'] == true -%>
+<% if scope['::varnish::varnishncsa::enabled'] == true -%>
              -F <%= scope['::varnish::varnishncsa::logformat'] %> \
 <% end -%>"

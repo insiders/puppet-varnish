@@ -66,7 +66,7 @@ class varnish (
   String $service_name                      = 'varnish',
   Optional[String] $vcl_reload_cmd          = undef,
   String $vcl_reload_path                   = $::path,
-  Boolean $varnishncsa_enable               = false,
+  Boolean $varnishncsa_enabled              = false,
   Optional[String] $varnishncsa_logformat   = '%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-agent}i"',
 ) {
 
@@ -115,7 +115,7 @@ class varnish (
   }
 
   class { '::varnish::varnishncsa':
-    enabled   => $varnishncsa_enable,
+    enabled   => $varnishncsa_enabled,
     logformat => $varnishncsa_logformat,
   }
 
