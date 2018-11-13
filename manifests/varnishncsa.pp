@@ -15,13 +15,15 @@ class varnish::varnishncsa (
 
   if $::varnish::params::service_provider == 'systemd' {
 
+    $_logformat = regsubst($logformat, '%', '%%')
+
     file { '/etc/systemd/system/varnishncsa.service.d/':
       ensure => 'directory',
     }
 
     file { '/etc/systemd/system/varnishncsa.service.d/varnishncsa.conf':
       ensure  => 'present',
-      content => "[Service]\nExecStart=\nExecStart=/usr/bin/varnishncsa -a -w /var/log/varnish/varnishncsa.log -D -F ${logformat}\n",
+      content => "[Service]\nExecStart=\nExecStart=/usr/bin/varnishncsa -a -w /var/log/varnish/varnishncsa.log -D -F ${_logformat}\n",
       require => File['/etc/systemd/system/varnishncsa.service.d/'],
       notify  => Exec['varnishncsa_systemctl_daemon_reload'],
     }
@@ -34,6 +36,8 @@ class varnish::varnishncsa (
     }
 
   } elsif $::varnish::params::service_provider == 'sysvinit' {
+
+    $_logformat = regsubst($logformat, '"', '\"')
 
     file { '/etc/default/varnishncsa':
       owner   => 'root',
